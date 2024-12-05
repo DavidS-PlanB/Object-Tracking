@@ -9,7 +9,7 @@ class Camera_Service:
         return net,classes
     
     def prepare_frame(frame):
-        blob = cv2.dnn.blobFromImage(frame, (416, 416), True, crop=False)
+        blob = cv2.dnn.blobFromImage(frame, 0.00392, (320, 320), (0, 0, 0), True, crop=False)
         return blob
     
     def process_predictions(outs,frame, traget_classes=None):
