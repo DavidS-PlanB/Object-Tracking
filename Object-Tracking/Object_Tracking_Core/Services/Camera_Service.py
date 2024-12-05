@@ -3,7 +3,7 @@ import numpy as np
 
 class Camera_Service:
     def Load_Yolo_model():
-        net = cv2.dnn.readNet("yolov4.weights", "Yolo_Files/yolov4.cfg")
+        net = cv2.dnn.readNet("Yolo_Files/yolov4.weights", "Yolo_Files/yolov4.cfg")
         with open ("Yolo_Files/coco.names", "r") as f:
             classes= [line.strip() for line in f.readlines()]
         return net,classes
