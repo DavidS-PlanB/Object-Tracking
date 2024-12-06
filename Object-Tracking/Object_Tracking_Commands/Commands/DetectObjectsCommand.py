@@ -18,6 +18,5 @@ class DetectObjectsCommand(Command):
         
         boxes, confidences, class_ids = camera_service.process_predictions(outs, self.frame, self.target_classes)
         camera_service.bounding_boxes(self.frame, boxes, confidences, class_ids, classes)
-        camera_service.stop_tracking(self.cap)
         cv2.imshow("Detected Objects", self.frame)
         
