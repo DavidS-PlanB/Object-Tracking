@@ -8,8 +8,8 @@ def main():
     cap = cv2.VideoCapture(0) #0 default port Camera
 
     if not cap.isOpened():
-        print("Error: Could not open video stream.")
-        return
+        print("Error: Camera could not be oppend.")
+        return 
 
     camera_service = CameraService()
     invoker = CameraInvoker()

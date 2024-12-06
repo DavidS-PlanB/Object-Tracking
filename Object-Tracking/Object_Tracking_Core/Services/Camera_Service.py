@@ -1,19 +1,26 @@
 import cv2
 import numpy as np
+import os 
 
 class CameraService:
     
-    def Load_Yolo_model():
-        net = cv2.dnn.readNet("Yolo_Files/yolov4.weights", "Yolo_Files/yolov4.cfg")
-        with open ("Yolo_Files/coco.names", "r") as f:
+    def Load_Yolo_model(self):
+        
+        folderpath = "Object_Tracking_Core/Services/Yolo_Files/"
+        weights_path = os.path.join(folderpath, "yolov4.weights")
+        cfg_path = os.path.join(folderpath, "yolov4.cfg")
+        classes_path = os.path.join(folderpath, "coco.names")
+
+        net = cv2.dnn.readNet(weights_path, cfg_path)
+        with open (classes_path, "r") as f:
             classes= [line.strip() for line in f.readlines()]
         return net,classes
     
-    def prepare_frame(frame):
+    def prepare_frame(self, frame):
         blob = cv2.dnn.blobFromImage(frame, 0.00392, (320, 320), (0, 0, 0), True, crop=False)
         return blob
     
-    def process_predictions(outs, frame, target_classes=None):
+    def process_predictions(self, outs, frame, target_classes=None):
         boxes = []
         confidences = []
         class_ids = []
@@ -51,13 +58,13 @@ class CameraService:
 
         return final_boxes, final_confidences, final_class_ids
     
-    def bounding_boxes(frame, boxes, confidences, class_ids, classes):
+    def bounding_boxes(self, frame, boxes, confidences, class_ids, classes):
         for i in range(len(boxes)):
             x ,y, w, h = boxes[i]
             label = str(classes[class_ids[i]])
             cv2.rectangle(frame, (x, y), (x + w , y +h), (0,255, 0), 2)
             cv2.putText(frame, f"{label} {confidences[i]:.2f}" ,(x, y -10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    def stop_tracking(cap):
+    def stop_tracking(self, cap):
         cap.release()
         cv2.destroyAllWindows()
