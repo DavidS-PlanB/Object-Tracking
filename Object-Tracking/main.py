@@ -1,5 +1,4 @@
 import cv2
-from Object_Tracking_Commands.Commands.Command import Command
 from Object_Tracking_Core.Services.Camera_Service import CameraService
 from Object_Tracking_Commands.Commands.DetectObjectsCommand import DetectObjectsCommand
 from Object_Tracking_Commands.Commands.CameraInvoker import CameraInvoker
@@ -13,7 +12,7 @@ def main():
 
     camera_service = CameraService()
     invoker = CameraInvoker()
-    target_classes = None #[39, 41]
+    target_classes = [39, 41] #None für kein Filter
     while True:
         ret, frame = cap.read()
 
@@ -22,7 +21,7 @@ def main():
             break
         
         # Command to create objects
-        detect_command = DetectObjectsCommand(camera_service, frame, cap, target_classes= None)
+        detect_command = DetectObjectsCommand(camera_service, frame, cap, target_classes)
         invoker.set_command(detect_command)
 
         # Execute the command

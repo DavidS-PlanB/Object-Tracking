@@ -1,11 +1,12 @@
 import cv2
 import numpy as np
 import os 
+from typing import Optional
 
 class CameraService:
     
-    def Load_Yolo_model(self):
-        
+    def Load_Yolo_model(self) :
+        '''Lädt das YOLO-Modell sowie die zugehörigen Klassen.'''
         folderpath = "Object_Tracking_Core/Services/Yolo_Files/"
         weights_path = os.path.join(folderpath, "yolov4.weights")
         cfg_path = os.path.join(folderpath, "yolov4.cfg")
@@ -16,11 +17,13 @@ class CameraService:
             classes= [line.strip() for line in f.readlines()]
         return net,classes
     
-    def prepare_frame(self, frame):
+    def prepare_frame(self, frame: np.ndarray):
+        '''Wandelt ein Bild in ein Blob um, das als Eingabe für das YOLO-Modell dient.'''
         blob = cv2.dnn.blobFromImage(frame, 0.00392, (320, 320), (0, 0, 0), True, crop=False)
         return blob
     
-    def process_predictions(self, outs, frame, target_classes=None):
+    def process_predictions(self, outs: list[np.ndarray], frame: np.ndarray, target_classes : Optional[list[int]] = None):
+        ''' Verarbeitet die Ausgabe des YOLO-Modells, um Bounding-Boxen, Konfidenzwerte und Klassen-IDs zu extrahieren.'''
         boxes = []
         confidences = []
         class_ids = []
@@ -58,13 +61,16 @@ class CameraService:
 
         return final_boxes, final_confidences, final_class_ids
     
-    def bounding_boxes(self, frame, boxes, confidences, class_ids, classes):
+    def bounding_boxes(self, frame :np.ndarray, boxes: list[list[int]], confidences: list[float], class_ids: list[int], classes: list[str]):
+        ''' Zeichnet Bounding-Boxen, Labels und Konfidenzwerte auf ein Bild.'''
         for i in range(len(boxes)):
             x ,y, w, h = boxes[i]
             label = str(classes[class_ids[i]])
             cv2.rectangle(frame, (x, y), (x + w , y +h), (0,255, 0), 2)
             cv2.putText(frame, f"{label} {confidences[i]:.2f}" ,(x, y -10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    def stop_tracking(self, cap):
+
+    def stop_tracking(self, cap: cv2.VideoCapture):
+        '''Beendet die Videoaufnahme und schließt alle Fenster.'''
         cap.release()
         cv2.destroyAllWindows()
