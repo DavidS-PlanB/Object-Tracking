@@ -2,20 +2,32 @@ import cv2
 import numpy as np
 import os 
 from typing import Optional
+import dotenv
 
 class CameraService:
-    
-    def Load_Yolo_model(self) :
-        '''Lädt das YOLO-Modell sowie die zugehörigen Klassen.'''
-        folderpath = "Object_Tracking_Core/Services/Yolo_Files/"
-        weights_path = os.path.join(folderpath, "yolov4.weights")
-        cfg_path = os.path.join(folderpath, "yolov4.cfg")
-        classes_path = os.path.join(folderpath, "coco.names")
 
-        net = cv2.dnn.readNet(weights_path, cfg_path)
+    _instance = None
+    
+    def __init__(self):
+        dotenv.load_dotenv()
+        '''Lädt das YOLO-Modell sowie die zugehörigen Klassen.'''
+        folderpath = os.getenv("FolderPath")
+        weights_path = os.path.join(folderpath, os.getenv("Weights"))
+        cfg_path = os.path.join(folderpath, os.getenv("Cfg"))
+        classes_path = os.path.join(folderpath, os.getenv("Coco"))
+
+        #print("Folder path:", folderpath)
+        #print("weights path: ", weights_path)
+        #print("config path: ",cfg_path)
+        #print("Classes path: ", classes_path)
+
+        self.net = cv2.dnn.readNet(weights_path, cfg_path)
+
         with open (classes_path, "r") as f:
-            classes= [line.strip() for line in f.readlines()]
-        return net,classes
+            self.classes= [line.strip() for line in f.readlines()]
+
+    def Load_Yolo_model(self) :
+        return self.net, self.classes
     
     def prepare_frame(self, frame: np.ndarray):
         '''Wandelt ein Bild in ein Blob um, das als Eingabe für das YOLO-Modell dient.'''
@@ -69,8 +81,15 @@ class CameraService:
             cv2.rectangle(frame, (x, y), (x + w , y +h), (0,255, 0), 2)
             cv2.putText(frame, f"{label} {confidences[i]:.2f}" ,(x, y -10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-
     def stop_tracking(self, cap: cv2.VideoCapture):
         '''Beendet die Videoaufnahme und schließt alle Fenster.'''
         cap.release()
         cv2.destroyAllWindows()
+
+    def complet_detection(self, frame, target_classes):
+        blob = self.prepare_frame(frame)
+        self.net.setInput(blob)
+        outs = self.net.forward(self.net.getUnconnectedOutLayersNames())
+        boxes, confidences, class_ids = self.process_predictions(outs, frame, target_classes)
+        self.bounding_boxes(frame, boxes, confidences, class_ids, self.classes)
+        cv2.imshow("Detected Objects", frame)
