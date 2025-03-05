@@ -11,12 +11,4 @@ class DetectObjectsCommand(Command):
 
     def execute(self):
         camera_service = self.service
-        net, classes = camera_service.Load_Yolo_model()
-        blob = camera_service.prepare_frame(self.frame)
-        net.setInput(blob)
-        outs = net.forward(net.getUnconnectedOutLayersNames())
-        
-        boxes, confidences, class_ids = camera_service.process_predictions(outs, self.frame, self.target_classes)
-        camera_service.bounding_boxes(self.frame, boxes, confidences, class_ids, classes)
-        cv2.imshow("Detected Objects", self.frame)
-        
+        camera_service.complet_detection(self.frame, self.target_classes)
