@@ -7,4 +7,4 @@ class CameraInvoker:
     def execute_commands(self):
         for command in self.command:
             command.execute()
-    
+        self.command.clear()
